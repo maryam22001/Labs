@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NodeMCU LED Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    button {
+      padding: 15px 40px;
+      margin: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    .on { 
+      background-color: #4CAF50; 
+      color: white;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+    .off { 
+      background-color: #f44336; 
+      color: white;
+      box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+    }
+    .brightness-container {
+      margin: 30px 0;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin: 20px 0;
+      height: 8px;
+      border-radius: 5px;
+      background: #ddd;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .connected {
+      background-color: #d4edda !important;
+      color: #155724;
+    }
+    .disconnected {
+      background-color: #f8d7da !important;
+      color: #721c24;
+    }
+    #brightnessValue {
+      font-size: 24px;
+      color: #667eea;
+      font-weight: bold;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .log-entry {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+    .log-sent {
+      color: #2196F3;
+    }
+    .log-received {
+      color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💡 NodeMCU LED Controller</h1>
+    
+    <button class="on" onclick="turnOn()">🔆 Turn ON</button>
+    <button class="off" onclick="turnOff()">🔅 Turn OFF</button>
+    
+    <div class="brightness-container">
+      <h3>Brightness: <span id="brightnessValue">128</span></h3>
+      <input type="range" min="0" max="255" value="128" id="brightnessSlider" oninput="changeBrightness(this.value)">
+    </div>
+    
+    <div id="status" class="disconnected">Status: Connecting...</div>
+    
+    <div id="log">
+      <div class="log-entry">Waiting for connection...</div>
+    </div>
+  </div>
+
+  <script>
+    let ws;
+    
+    function connect() {
+      // Connect to WebSocket server
+      // Change 'localhost:3000' to your computer's IP if accessing from another device
+      ws = new WebSocket('ws://localhost:3000');
+      
+      ws.onopen = () => {
+        updateStatus('Connected to Server ✓', 'connected');
+        addLog('Connected to WebSocket server', 'received');
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received:', data);
+          
+          if (data.type === 'status') {
+            if (data.data) {
+              // Response from NodeMCU
+              if (data.data.status) {
+                updateStatus(data.data.status, 'connected');
+                addLog('NodeMCU: ' + data.data.status, 'received');
+              }
+            } else if (data.message) {
+              updateStatus(data.message, 'connected');
+              addLog('Status: ' + data.message, 'received');
+            }
+          } else if (data.type === 'connection') {
+            addLog(data.message, 'received');
+          }
+        } catch (e) {
+          // Plain text message
+          updateStatus(event.data, 'connected');
+          addLog(event.data, 'received');
+        }
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        updateStatus('Connection Error ✗', 'disconnected');
+        addLog('Connection error', 'error');
+      };
+      
+      ws.onclose = () => {
+        updateStatus('Disconnected ✗', 'disconnected');
+        addLog('Disconnected from server', 'error');
+        // Try to reconnect after 3 seconds
+        setTimeout(connect, 3000);
+      };
+    }
+    
+    function updateStatus(message, state) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Status: ' + message;
+      statusEl.className = state;
+    }
+    
+    function addLog(message, type) {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry log-' + type;
+      const time = new Date().toLocaleTimeString();
+      entry.textContent = `[${time}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+      
+      // Keep only last 20 entries
+      if (logEl.children.length > 20) {
+        logEl.removeChild(logEl.firstChild);
+      }
+    }
+    
+    function sendCommand(command) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(command));
+        addLog('Sent: ' + JSON.stringify(command), 'sent');
+      } else {
+        alert('Not connected to server!');
+        addLog('Failed to send - not connected', 'error');
+      }
+    }
+    
+    function turnOn() {
+      sendCommand({ command: 'ON' });
+    }
+    
+    function turnOff() {
+      sendCommand({ command: 'OFF' });
+    }
+    
+    function changeBrightness(value) {
+      document.getElementById('brightnessValue').textContent = value;
+      sendCommand({ command: 'BRIGHTNESS', value: parseInt(value) });
+    }
+    
+    // Connect on page load
+    connect();
+  </script>
+</body>
+</html>
