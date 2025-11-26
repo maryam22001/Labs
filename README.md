@@ -1,119 +1,71 @@
-# IoT & Embedded Systems Lab Repository
+# Embedded Systems & IoT Repository
 
-This repository contains a collection of labs demonstrating various embedded systems and IoT concepts, ranging from low-level AVR motor control to real-time WebSocket communication and secure MQTT messaging.
+This repository contains a comprehensive collection of labs demonstrating computing concepts across multiple abstraction layers. The projects range from **MIPS Assembly language** processing and **AVR motor control** to **Real-time WebSockets** and **Secure MQTT** cloud messaging.
 
 ## Table of Contents
+1. [Module 1: Stepper Motor Control System](#module-1-stepper-motor-control-system)
+2. [Module 2: Real-time IoT LED Controller (WebSockets)](#module-2-real-time-iot-led-controller-websockets)
+3. [Module 3: MQTT Sensor Simulation (HiveMQ)](#module-3-mqtt-sensor-simulation-hivemq)
+4. [Module 4: MIPS Assembly Language Programming](#module-4-mips-assembly-language-programming)
 
-1.  [Module 1: Stepper Motor Control System](https://www.google.com/search?q=%23module-1-stepper-motor-control-system)
-2.  [Module 2: Real-time IoT LED Controller (WebSockets)](https://www.google.com/search?q=%23module-2-real-time-iot-led-controller-websockets)
-3.  [Module 3: MQTT Sensor Simulation (HiveMQ)](https://www.google.com/search?q=%23module-3-mqtt-sensor-simulation-hivemq)
-
------
+---
 
 ## Module 1: Stepper Motor Control System
-
 **Location:** `/Motor/sketch_oct11a.ino`
 
 A complete control system for a stepper motor using an AVR/Arduino architecture. It features a Finite State Machine (FSM) to handle various operational modes, speed control, and emergency safety protocols.
 
 ### Features
+* **5 Operational Modes:** STOP, MANUAL (Half/Full), and AUTO (Half/Full).
+* **Emergency Stop:** Triggered by holding the Start/Stop button for 2 seconds.
+* **Visual Interface:** 7-Segment Display (showing Mode ID or 'E' for error) and Status LEDs.
+* **Control Inputs:** Buttons for Mode, Start/Stop, Direction, and Speed adjustments (50ms - 2000ms).
 
-  * **5 Operational Modes:**
-    0\.  **STOP:** Motor is idle.
-    1.  **MANUAL\_HALF:** Single half-step per button press.
-    2.  **MANUAL\_FULL:** Single full-step per button press.
-    3.  **AUTO\_HALF:** Continuous rotation using half-stepping.
-    4.  **AUTO\_FULL:** Continuous rotation using full-stepping.
-  * **Emergency Stop:** Triggered by holding the Start/Stop button for 2 seconds. Immediately halts the system and blinks 'E' on the display.
-  * **Visual Interface:**
-      * **7-Segment Display:** Shows the current mode ID (0-4) or 'E' for error.
-      * **LEDs:** Indicate Status (Running/Stopped) and Direction (Forward/Reverse).
-  * **Control Inputs:**
-      * **Mode:** Cycles through operation modes.
-      * **Start/Stop:** Toggles motor state.
-      * **Direction:** Toggles between Clockwise and Counter-Clockwise.
-      * **Speed Up/Down:** Adjusts the delay between steps (50ms - 2000ms).
-
-### Hardware Pinout
-
-| Component | Pin | Description |
-| :--- | :--- | :--- |
-| **Buttons** | 2, 3, 4, 5, 6 | Mode, Start/Stop, Dir, Speed Up, Speed Down |
-| **LEDs** | 7, 8 | Status LED, Direction LED |
-| **7-Segment** | 9-13, A0, A1 | Segments A-G |
-| **Stepper** | A2-A5 | Coils 1-4 |
-
-### Code Highlights
-
-The system uses non-blocking logic (`millis()`) for button debouncing and step timing, allowing the UI to remain responsive while the motor moves.
-
------
+---
 
 ## Module 2: Real-time IoT LED Controller (WebSockets)
-
 **Location:** `/Task1-iot`
 
-An IoT application that establishes bidirectional communication between a web browser and an ESP8266 (NodeMCU) to control an LED's state and brightness in real-time.
+An IoT application establishing bidirectional communication between a web browser and an ESP8266 (NodeMCU) to control hardware in real-time.
 
 ### Architecture
+* **Node.js Server:** Hosting a dashboard and WebSocket server.
+* **Web Client:** Responsive UI with sliders and status logging.
+* **Embedded Client:** ESP8266 parsing JSON commands to control PWM brightness.
 
-1.  **Node.js Server (`server.js`):**
-      * Hosts a web interface (`public/index.html`).
-      * Runs a WebSocket server to broadcast JSON commands.
-      * Provides a REST API endpoint (`/api/command/:cmd`) for external control.
-2.  **Web Client (`index.html`):**
-      * A responsive dashboard to toggle the LED and adjust brightness via a slider.
-      * Displays a live log of sent/received WebSocket messages.
-3.  **Embedded Client (`sketch_oct15a.ino`):**
-      * Runs on ESP8266 (NodeMCU).
-      * Connects to WiFi and the WebSocket server.
-      * Parses JSON commands to control the LED via PWM.
+### Protocol
+JSON payloads are used for state management:
+* **Command:** `{"command": "BRIGHTNESS", "value": 128}`
+* **Status:** `{"status": "LED is ON"}`
 
-### Communication Protocol
-
-Data is exchanged in JSON format:
-
-  * **Command (Web -\> ESP):** `{"command": "BRIGHTNESS", "value": 128}`
-  * **Status (ESP -\> Web):** `{"status": "LED is ON"}`
-
-### Setup & Usage
-
-1.  **Server:** Run `node server.js` to start the server on port 3000.
-2.  **Hardware:** Flash the `ino` file to a NodeMCU. *Note: Ensure the `SERVER` IP in the Arduino code matches your PC's local IP address.*
-3.  **Control:** Open `http://localhost:3000` to control the LED.
-
------
+---
 
 ## Module 3: MQTT Sensor Simulation (HiveMQ)
-
 **Location:** `/Task2-iot`
 
-A Python-based simulation of an IoT sensor node that publishes telemetry data securely to a cloud broker (HiveMQ) using the MQTT protocol.
+A Python-based simulation of an IoT sensor node that publishes telemetry data securely to a cloud broker (HiveMQ) using MQTT v5 over TLS.
 
 ### Components
+* **`psuedoSensor.py`:** Generates realistic temperature/humidity data with random noise.
+* **`mqtt_client.py`:** Publishes to `pi/sensor` and subscribes to `pi/#` for verification.
 
-  * **`psuedoSensor.py`:** A class that generates realistic temperature and humidity data. It iterates through predefined arrays with added random noise to simulate natural environmental fluctuations.
-  * **`mqtt_client.py`:** The main entry point using the `paho-mqtt` library.
-      * **Protocol:** MQTT v5 over TLS/SSL (Port 8883).
-      * **Topic:** Publishes to `pi/sensor`.
-      * **Subscription:** Listens to `pi/#` to verify message receipt.
+---
 
-### Usage
+## Module 4: MIPS Assembly Language Programming
+**Location:** Root Directory (`Q1.asm`, `Q2-sol.asm`, `assembly.docx`)
 
-The script initializes a secure connection to the HiveMQ cloud instance and enters a loop:
+This module explores low-level memory management, arithmetic logic, and coprocessor operations using MIPS Assembly.
 
-1.  Generates new sensor values (e.g., `{"humidity": 45.2, "temperature": 22.5}`).
-2.  Publishes the JSON payload to the topic `pi/sensor`.
-3.  Waits for 10 seconds before the next reading.
+### Task 1: Integer Parity Checker & Debugging
+**File:** `Q1.asm`
+A program that accepts an integer input and determines if it is **Even** or **Odd** using bitwise operations.
+* **Logic:** Uses `andi $t0, $v0, 1` to isolate the Least Significant Bit (LSB). If LSB is 0, the number is even.
+* **Debugging:** The development process involved tracing specific errors such as missing `.data` directives, incorrect syscall arguments (`li $a0, 4` vs `li $v0, 4`), and logic flow issues.
 
-### Dependencies
-
-  * Python 3.x
-  * `paho-mqtt`
-
-<!-- end list -->
-
-```bash
-pip install paho-mqtt
-python mqtt_client.py
-```
+### Task 2: Advanced Array Statistics (Min, Max, Avg)
+**File:** `Q2-sol.asm`
+A complex program that processes an array of integers (up to 30 elements) provided by the user.
+* **Features:**
+    * **Dynamic Input:** Stops reading when the user enters a negative number or reaches the 30-element limit.
+    * **Single-Pass Logic:** Calculates Min and Max values in a single loop traversal for efficiency.
+    * **Floating Point Arithmetic:** Calculates the average using Coprocessor 1 (FPU). It converts the integer sum to single-precision float (`cvt.s.w`) before dividing by 2.0 (`div.s`).
