@@ -7,6 +7,8 @@ This repository contains a comprehensive collection of labs demonstrating comput
 2. [Module 2: Real-time IoT LED Controller (WebSockets)](#module-2-real-time-iot-led-controller-websockets)
 3. [Module 3: MQTT Sensor Simulation (HiveMQ)](#module-3-mqtt-sensor-simulation-hivemq)
 4. [Module 4: MIPS Assembly Language Programming](#module-4-mips-assembly-language-programming)
+5. [Module 5: AVR Timers & Interrupts System](#module-5-avr-timers--interrupts-system)
+6. [Module 6: CPUSIM Processor Design & Simulation](#module-6-cpusim-processor-design--simulation)
 
 ---
 
@@ -69,3 +71,45 @@ A complex program that processes an array of integers (up to 30 elements) provid
     * **Dynamic Input:** Stops reading when the user enters a negative number or reaches the 30-element limit.
     * **Single-Pass Logic:** Calculates Min and Max values in a single loop traversal for efficiency.
     * **Floating Point Arithmetic:** Calculates the average using Coprocessor 1 (FPU). It converts the integer sum to single-precision float (`cvt.s.w`) before dividing by 2.0 (`div.s`).
+
+---
+
+## Module 5: AVR Timers & Interrupts System
+**Location:** `/AVR-task2/sketch_dec3a/sketch_dec3a.ino`
+**Simulation (SimulIDE):** `/AVR-task2/backup.sim1`
+
+A practical implementation demonstrating the simultaneous use of all three ATmega328P timers (Timer0, Timer1, Timer2) to manage concurrent tasks without blocking the main loop.
+
+### Architecture & Timer Assignments
+* **Timer0 (CTC Mode):**
+    * **Function:** Controls the blinking frequency of an LED on **PB0**.
+    * **Interaction:** Pressing **Button 1 (PD2)** cycles through 3 different blink speeds by updating the `OCR0A` compare match threshold.
+* **Timer1 (Fast PWM Mode):**
+    * **Function:** Controls the brightness of an LED on **PB1** using 8-bit Fast PWM.
+    * **Interaction:** Pressing **Button 2 (PD3)** increases the duty cycle (`OCR1A`), cycling through 5 brightness levels.
+* **Timer2 (Normal Mode):**
+    * **Function:** Acts as a dedicated hardware timer for button debouncing.
+    * **Logic:** Generates a delay (approx. 15 overflows) to ignore noise/bouncing after a button press is detected.
+
+---
+
+## Module 6: CPUSIM Processor Design & Simulation
+**Location:** `/CPUSIM`
+**Documentation:** `/CPUSIM/CPU SIM TASK.pdf`
+
+This module involves the design, microcoding, and simulation of a custom 16-bit CPU architecture to explore the trade-offs between RISC and CISC design philosophies.
+
+### Hardware Design
+* **Registers:** Custom set including Accumulator (ACC), Instruction Register (IR), Program Counter (PC), and General Purpose Registers (R0, R1).
+* **Instruction Set:** Implemented a custom ISA including `load`, `store`, `add`, `multiply`, `jump`, and conditional branches.
+
+### Architectural Comparison Experiment
+The project implements multiplication using two distinct approaches to demonstrate hardware vs. software complexity:
+
+1.  **Software Multiplication (RISC Approach):**
+    * **Method:** Repeated addition using a loop in assembly (Code 1).
+    * **Characteristics:** High program complexity, higher memory usage, but simpler hardware instruction set.
+
+2.  **Hardware Multiplication (CISC Approach):**
+    * **Method:** A dedicated `multiply` instruction microcoded directly into the CPU (Code 2).
+    * **Characteristics:** Low program complexity (single instruction), efficient memory usage, but requires complex internal hardware logic.
