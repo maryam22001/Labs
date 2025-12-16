@@ -1,0 +1,14 @@
+; code 2
+
+       start:
+        read
+        move0          
+        store x
+
+        read
+        move1          
+
+        loadAccc1       
+        multiply x     
+        write
+x: .data 2 0

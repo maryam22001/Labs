@@ -1,0 +1,35 @@
+; Factorial 
+;start:
+    read 
+    move0
+    store x
+    load res
+    store res 
+loop:
+     loadAcc0
+     jmpz print 
+
+     load res
+     multiply x
+     store res
+
+     loadAcc0
+     subtract one 
+     move0
+     store x
+     jump loop
+       
+print:
+     load res
+      write 
+      
+
+one:    .data 2 1
+res:    .data 2 1
+x:      .data 2 1
+
+
+
+
+
+

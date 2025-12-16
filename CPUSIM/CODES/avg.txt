@@ -1,0 +1,36 @@
+
+
+start:  read          
+        store num1   
+        read          
+        store num2
+        read         
+        store num3
+        read          
+        store num4
+        read        
+        store num5
+
+        load num1   
+        add num2      
+        add num3      
+        add num4      
+        add num5      
+        store sum     
+
+        load sum      
+        divide five
+        write
+
+
+num1:   .data 2 0
+num2:   .data 2 0
+num3:   .data 2 0
+num4:   .data 2 0
+num5:   .data 2 0
+sum:    .data 2 0
+temp:   .data 2 0
+avg:    .data 2 0
+count:  .data 2 5     
+one:    .data 2 1
+five:   .data 2 5

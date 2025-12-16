@@ -1,0 +1,19 @@
+read 
+store x 
+read  
+store y
+loop: 
+load y
+jmpz print 
+subtract one
+ store y 
+load res 
+add x 
+store res 
+jump loop 
+print: load res 
+write 
+one: .data 2 1
+res: .data 2 0 
+x: .data 2 1
+y: .data 2 1
